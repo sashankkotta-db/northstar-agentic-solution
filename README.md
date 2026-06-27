@@ -46,24 +46,36 @@ deployment/        deploy.sh, grant_resources.sh, grant_lakebase.py, config.env.
 ```
 
 ## Deployment steps
-1. **Data** — run `data_generation/generate_cpg_data_databricks.py` as a Databricks notebook/job → tables in `…northstar_cpg`.
-2. **Vector Search** — `bash setup/01_create_vector_search.sh`.
-3. **Genie** — `python3 setup/02_create_genie_space.py` then `databricks genie create-space --json @/tmp/genie_space.json`.
-4. **Lakebase** — create instance `northstar-lakebase`; run `setup/03_lakebase_setup.py` as a notebook.
-5. **Create `config.env`** — copy the template and fill in your IDs (profile, catalog, warehouse, Genie space, experiment). This one gitignored file is the single source for every deploy-time value:
-   ```bash
-   cp deployment/config.env.example deployment/config.env
-   # then edit deployment/config.env and fill in:
-   #   DATABRICKS_PROFILE, CATALOG, WAREHOUSE_ID, GENIE_SPACE_ID, EXPERIMENT_ID
-   #   (SCHEMA, LAKEBASE_INSTANCE_NAME, MODEL_ENDPOINT, EMBEDDING_ENDPOINT have working defaults)
-   ```
-6. **Deploy the app, then grant access** — run both scripts in order (they read `config.env`):
-   ```bash
-   bash deployment/deploy.sh           # validates config.env, deploys the app bundle, starts the app
-   bash deployment/grant_resources.sh  # grants the app's service principal UC + warehouse + Lakebase access
-   ```
-   > The dashboard graphs and the agent's Genie tool only work **after** `grant_resources.sh` completes.
-7. **(Optional) Evaluate / traces** — run `setup/08_agent_eval.py` and `setup/07_trace_demo.py` as notebooks.
+
+Each step is tagged with **where to run it**:
+- 🖥️ **Local CLI** — your terminal, with the Databricks CLI authenticated to your profile.
+- 📓 **Databricks notebook** — upload the file to the workspace and run it as a notebook/job (needs the Spark runtime; these files start with `# Databricks notebook source`).
+
+| # | Step | Run from | What to run |
+|---|------|----------|-------------|
+| 1 | **Data** | 📓 Databricks notebook | `data_generation/generate_cpg_data_databricks.py` → 8 Delta tables in `…northstar_cpg` |
+| 2 | **Vector Search** | 🖥️ Local CLI | `bash setup/01_create_vector_search.sh` |
+| 3 | **Genie** | 🖥️ Local CLI | `python3 setup/02_create_genie_space.py` (writes the payload locally), then `databricks genie create-space --json @/tmp/genie_space.json` |
+| 4a | **Lakebase instance** | 🖥️ Local CLI / UI | create the instance `northstar-lakebase` |
+| 4b | **Lakebase schema** | 📓 Databricks notebook | `setup/03_lakebase_setup.py` → memory schema/tables |
+| 5 | **Create `config.env`** | 🖥️ Local CLI | `cp deployment/config.env.example deployment/config.env` then edit (see below) |
+| 6 | **Deploy + grant** | 🖥️ Local CLI | `bash deployment/deploy.sh` then `bash deployment/grant_resources.sh` |
+| 7 | **(Optional) Evaluate / traces** | 📓 Databricks notebook | `setup/08_agent_eval.py`, `setup/09_eval_results.py`, `setup/07_trace_demo.py` |
+
+**Step 5 — fill in `config.env`** (🖥️ Local CLI). This one gitignored file is the single source for every deploy-time value:
+```bash
+cp deployment/config.env.example deployment/config.env
+# then edit deployment/config.env and fill in:
+#   DATABRICKS_PROFILE, CATALOG, WAREHOUSE_ID, GENIE_SPACE_ID, EXPERIMENT_ID
+#   (SCHEMA, LAKEBASE_INSTANCE_NAME, MODEL_ENDPOINT, EMBEDDING_ENDPOINT have working defaults)
+```
+
+**Step 6 — deploy, then grant** (🖥️ Local CLI), in order (both read `config.env`):
+```bash
+bash deployment/deploy.sh           # validates config.env, deploys the app bundle, starts the app
+bash deployment/grant_resources.sh  # grants the app's service principal UC + warehouse + Lakebase access
+```
+> The dashboard graphs and the agent's Genie tool only work **after** `grant_resources.sh` completes.
 
 ## Local development
 The app (`agent_app/`) is a FastAPI + LangGraph server managed with [`uv`](https://docs.astral.sh/uv/). To run the 2-tab UI + agent on your machine:
