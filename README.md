@@ -65,6 +65,15 @@ deployment/        deploy.sh, grant_resources.sh, grant_lakebase.py, config.env.
    > The dashboard graphs and the agent's Genie tool only work **after** `grant_resources.sh` completes.
 7. **(Optional) Evaluate / traces** — run `setup/08_agent_eval.py` and `setup/07_trace_demo.py` as notebooks.
 
+## Local development
+The app (`agent_app/`) is a FastAPI + LangGraph server managed with [`uv`](https://docs.astral.sh/uv/). To run the 2-tab UI + agent on your machine:
+```bash
+cd agent_app
+uv run quickstart --profile <your-databricks-profile>   # one-time: auth + generate .env
+uv run start-app                                         # serve the Dashboard + Assistant locally
+```
+The agent's logic lives in `agent_app/agent_server/agent.py`.
+
 ## Configuration & scripts
 
 **`config.env` is the single source of truth.** Both deploy scripts source it, and it exports the

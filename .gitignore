@@ -49,3 +49,9 @@ load-test-runs/
 
 # ---- Docs folder (excluded from this repo per request) ----
 /docs/
+
+# ---- Kept local, but not pushed to the repo (template extras / second build) ----
+agent_app/README.md
+agent_app/.github/
+agent_app/.claude/
+build_e2/

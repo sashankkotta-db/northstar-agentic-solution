@@ -1,7 +1,0 @@
-{
-  "run_name": "northstar_lakebase_setup_e2",
-  "tasks": [
-    { "task_key": "lakebase_setup",
-      "notebook_task": { "notebook_path": "/Users/you@example.com/northstar_cpg_build/03_lakebase_setup" } }
-  ]
-}
