@@ -51,16 +51,16 @@ Each step is tagged with **where to run it**:
 - 🖥️ **Local CLI** — your terminal, with the Databricks CLI authenticated to your profile.
 - 📓 **Databricks notebook** — upload the file to the workspace and run it as a notebook/job (needs the Spark runtime; these files start with `# Databricks notebook source`).
 
-| # | Step | Run from | What to run |
-|---|------|----------|-------------|
-| 1 | **Data** | 📓 Databricks notebook | `data_generation/generate_cpg_data_databricks.py` → 8 Delta tables in `…northstar_cpg` |
-| 2 | **Vector Search** | 🖥️ Local CLI | `bash setup/01_create_vector_search.sh` |
-| 3 | **Genie** | 🖥️ Local CLI | `python3 setup/02_create_genie_space.py` (writes the payload locally), then `databricks genie create-space --json @/tmp/genie_space.json` |
-| 4a | **Lakebase instance** | 🖥️ Local CLI / UI | create the instance `northstar-lakebase` |
-| 4b | **Lakebase schema** | 📓 Databricks notebook | `setup/03_lakebase_setup.py` → memory schema/tables |
-| 5 | **Create `config.env`** | 🖥️ Local CLI | `cp deployment/config.env.example deployment/config.env` then edit (see below) |
-| 6 | **Deploy + grant** | 🖥️ Local CLI | `bash deployment/deploy.sh` then `bash deployment/grant_resources.sh` |
-| 7 | **(Optional) Evaluate / traces** | 📓 Databricks notebook | `setup/08_agent_eval.py`, `setup/09_eval_results.py`, `setup/07_trace_demo.py` |
+| # | Step | Run from | Description | What to run |
+|---|------|----------|-------------|-------------|
+| 1 | **Data** | 📓 Databricks notebook | Generate the synthetic CPG dataset — products, sales (sell-in/sell-out), promotions, inventory, market share, and documents | `data_generation/generate_cpg_data_databricks.py` → 8 Delta tables in `…northstar_cpg` |
+| 2 | **Vector Search** | 🖥️ Local CLI | Create the embeddings index over the `documents` table so the agent can do RAG retrieval | `bash setup/01_create_vector_search.sh` |
+| 3 | **Genie** | 🖥️ Local CLI | Create the Genie space (NL→SQL) over the CPG tables — the agent's analytics tool | `python3 setup/02_create_genie_space.py` (writes the payload locally), then `databricks genie create-space --json @/tmp/genie_space.json` |
+| 4a | **Lakebase instance** | 🖥️ Local CLI / UI | Provision the managed Postgres instance that backs the agent's long-term memory | create the instance `northstar-lakebase` |
+| 4b | **Lakebase schema** | 📓 Databricks notebook | Create the schema/tables the agent's memory store reads & writes | `setup/03_lakebase_setup.py` → memory schema/tables |
+| 5 | **Create `config.env`** | 🖥️ Local CLI | Set the single config file with your workspace IDs — both deploy scripts read it | `cp deployment/config.env.example deployment/config.env` then edit (see below) |
+| 6 | **Deploy + grant** | 🖥️ Local CLI | Deploy the app via the bundle, then grant its service principal data / warehouse / Lakebase access | `bash deployment/deploy.sh` then `bash deployment/grant_resources.sh` |
+| 7 | **(Optional) Evaluate / traces** | 📓 Databricks notebook | Run MLflow agent evaluation and generate demo traces for the walkthrough | `setup/08_agent_eval.py`, `setup/09_eval_results.py`, `setup/07_trace_demo.py` |
 
 **Step 5 — fill in `config.env`** (🖥️ Local CLI). This one gitignored file is the single source for every deploy-time value:
 ```bash
