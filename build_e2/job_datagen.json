@@ -1,0 +1,11 @@
+{
+  "run_name": "northstar_cpg_datagen_e2",
+  "tasks": [
+    {
+      "task_key": "generate_cpg_data",
+      "notebook_task": {
+        "notebook_path": "/Users/you@example.com/northstar_cpg_build/generate_cpg_data_e2"
+      }
+    }
+  ]
+}
